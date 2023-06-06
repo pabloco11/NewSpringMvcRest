@@ -5,7 +5,7 @@ pipeline {
     stage('Limpieza') {
       steps {
         echo "Limpieza"
-        sh 'mvn clean'
+        sh "mvn clean"
       }
     }
     
