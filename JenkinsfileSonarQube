@@ -1,37 +1,43 @@
 pipeline {
-    agent any
-    stages {
-        stage('Limpieza') { 
-            steps {
-                echo "Limpieza"
-                sh "mvn clean"
-            }
+  agent any
+  
+  stages {
+    stage('Limpieza') {
+      steps {
+        echo "Limpieza"
+        sh "mvn clean"
+      }
+    }
+    
+    stage('Construcción') {
+      steps {
+        echo "Construcción"
+        sh 'mvn -B package'
+      }
+    }
+    
+    stage('Test') {
+      steps {
+        echo "Test"
+        sh 'mvn clean verify'
+      }
+    }
+    
+    stage('SonarQube Analysis') {
+      environment {
+        SCANNER_HOME = tool 'Sonarqube Scan'
+      }
+      steps {
+        withSonarQubeEnv(credentialsId: 'SecretSonarQube', installationName: 'SonarQube') {
+          sh """$SCANNER_HOME/bin/sonar-scanner \
+            -Dsonar.projectKey=EjercicioM3-L4 \
+            -Dsonar.projectName=EjercicioM3-L4 \
+            -Dsonar.sources=src/ \
+            -Dsonar.java.binaries=target/classes/ \
+            -Dsonar.exclusions=src/test/java/****/*.java \
+            -Dsonar.projectVersion=${BUILD_NUMBER}-${GIT_COMMIT_SHORT}"""
         }
-        stage('Contruccion') { 
-            steps {
-            echo "Contruccion"
-                sh 'mvn -B package' 
-            }
-        }
-        stage('Test') { 
-            steps {
-             echo "Test"
-                sh 'mvn clean verify' 
-            }
-        }
-        stage('SonarQube analysis') {
-            environment {
-                SCANNER_HOME = tool 'Sonarqube Scan'
-            }
-            steps {
-                withSonarQubeEnv(credentialsId: 'SecretSonarQube', installationName: 'SonarQube') {
-                    sh '''$SCANNER_HOME/bin/sonar-scanner \
-                    -Dsonar.projectKey=EjercicioM3-L4 \
-                    -Dsonar.projectName=EjercicioM3-L4 \
-                    -Dsonar.sources=src/ \
-                    -Dsonar.java.binaries=target/classes/ \
-                    -Dsonar.exclusions=src/test/java/****/*.java \
-                    -Dsonar.projectVersion=${BUILD_NUMBER}-${GIT_COMMIT_SHORT}'''
-                }
-            }
-        }
+      }
+    }
+  }
+}
