@@ -21,7 +21,7 @@ pipeline {
         SCANNER_HOME = tool 'Sonarqube Scan'
       }
       steps {
-        withSonarQubeEnv(credentialsId: 'SecretSonarQube', installationName: 'SonarQube') {
+        withSonarQubeEnv(credentialsId: 'SecretSonarQube', installationName: 'Sonarqube Scan') {
           sh """$SCANNER_HOME/bin/sonar-scanner \
             -Dsonar.projectKey=EjercicioM3-L4 \
             -Dsonar.projectName=EjercicioM3-L4 \
