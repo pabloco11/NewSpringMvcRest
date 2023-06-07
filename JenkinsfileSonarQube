@@ -1,6 +1,6 @@
 pipeline {
   agent any
-  
+
   stages {
     stage('Construcción') {
       steps {
@@ -8,27 +8,27 @@ pipeline {
         sh 'mvn -B package'
       }
     }
-    
+
     stage('Test') {
       steps {
         echo "Test"
         sh 'mvn clean verify'
       }
     }
-    
-    stage('SonarQube Analysis') {
-      environment {
-        SCANNER_HOME = tool 'Sonarqube Scan'
-      }
+
+    stage('SCM') {
       steps {
-        withSonarQubeEnv(credentialsId: 'SecretSonarQube', installationName: 'SonarQube') {
-          sh """$SONARQUBE_HOME/bin/sonar-scanner \
-            -Dsonar.projectKey=EjercicioM3-L4 \
-            -Dsonar.projectName=EjercicioM3-L4 \
-            -Dsonar.sources=src/ \
-            -Dsonar.java.binaries=target/classes/ \
-            -Dsonar.exclusions=src/test/java/****/*.java \
-            -Dsonar.projectVersion=${BUILD_NUMBER}-${GIT_COMMIT_SHORT}"""
+        checkout scm
+      }
+    }
+
+    stage('SonarQube Analysis') {
+      steps {
+        script {
+          def mvn = tool 'Default Maven'
+          withSonarQubeEnv() {
+            sh "${mvn}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=EjercicioM3-L4 -Dsonar.projectName='EjercicioM3-L4'"
+          }
         }
       }
     }
